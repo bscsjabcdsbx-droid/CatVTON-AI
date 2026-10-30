@@ -187,3 +187,9 @@ All the materials, including code, checkpoints, and demo, are made available und
  url={https://arxiv.org/abs/2407.15886}, 
 }
 ```
+
+
+## API cho Shop_API (thử đồ AI trên website)
+`api_server.py` cung cấp API FastAPI có hàng đợi GPU, xác thực bằng `X-API-Key`, timeout, hủy tác vụ và giữ ảnh chỉ trong RAM.
+Cài đặt, cấu hình Cloudflare Tunnel và vận hành: xem [CATVTON_INTEGRATION.md](CATVTON_INTEGRATION.md). Kiểm thử: `python -m pytest tests -q`.
+Giao diện Gradio (`app.py`) không thay đổi.

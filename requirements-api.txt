@@ -1,0 +1,10 @@
+# Thư viện cho CatVTON API (api_server.py). Cài sau requirements.txt:
+#   pip install -r requirements.txt -r requirements-api.txt
+# fastapi / uvicorn / python-multipart thường đã được gradio==4.41.0 kéo về;
+# các ràng buộc dưới đây chỉ đảm bảo chúng có mặt, không ép nâng/hạ phiên bản.
+fastapi>=0.100
+uvicorn>=0.23
+python-multipart>=0.0.9
+# Chỉ dùng để chạy test (python -m pytest tests -q):
+pytest>=7
+httpx>=0.24
