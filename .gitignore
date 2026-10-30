@@ -8,3 +8,9 @@ resource/demo/output/
 *.ckpt
 *.pth
 *.bin
+
+# Python cache and backup files
+__pycache__/
+*.py[cod]
+*.bak
+.pytest_cache/

@@ -192,6 +192,10 @@ class CatVTONPipeline:
                     and (i + 1) % self.noise_scheduler.order == 0
                 ):
                     progress_bar.update()
+                # [Shop_API] Callback tùy chọn sau mỗi bước (dùng cho timeout/hủy tác vụ).
+                # Không truyền step_callback thì hành vi giống hệt bản gốc.
+                if kwargs.get("step_callback") is not None:
+                    kwargs["step_callback"](i + 1, len(timesteps))
 
         # Decode the final latents
         latents = latents.split(latents.shape[concat_dim] // 2, dim=concat_dim)[0]
@@ -201,17 +205,36 @@ class CatVTONPipeline:
         # we always cast to float32 as this does not cause significant overhead and is compatible with bfloat16
         image = image.cpu().permute(0, 2, 3, 1).float().numpy()
         image = numpy_to_pil(image)
-        
-        # Safety Check
+
+                # Safety Check
+        is_nsfw = False
+
         if not self.skip_safety_check:
-            current_script_directory = os.path.dirname(os.path.realpath(__file__))
-            nsfw_image = os.path.join(os.path.dirname(current_script_directory), 'resource', 'img', 'NSFW.jpg')
-            nsfw_image = PIL.Image.open(nsfw_image).resize(image[0].size)
             image_np = np.array(image)
             _, has_nsfw_concept = self.run_safety_checker(image=image_np)
-            for i, not_safe in enumerate(has_nsfw_concept):
-                if not_safe:
-                    image[i] = nsfw_image
+
+            if has_nsfw_concept is not None:
+                is_nsfw = any(bool(flag) for flag in has_nsfw_concept)
+
+            # Giữ nguyên hành vi cũ cho app.py và các ứng dụng khác.
+            # API sẽ tự nhận trạng thái và không sử dụng ảnh placeholder.
+            if not kwargs.get("return_nsfw_status", False) and is_nsfw:
+                current_script_directory = os.path.dirname(os.path.realpath(__file__))
+                nsfw_image = os.path.join(
+                    os.path.dirname(current_script_directory),
+                    "resource",
+                    "img",
+                    "NSFW.jpg",
+                )
+                nsfw_image = PIL.Image.open(nsfw_image).resize(image[0].size)
+
+                for i, not_safe in enumerate(has_nsfw_concept):
+                    if not_safe:
+                        image[i] = nsfw_image
+
+        if kwargs.get("return_nsfw_status", False):
+            return image, is_nsfw
+
         return image
 
 
